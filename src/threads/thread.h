@@ -96,6 +96,10 @@ struct thread
     /* Record the time the thread has been blocked. */
     int64_t ticks_blocked;
 
+    int base_priority;                  /* Base priority. */
+    struct list locks;                  /* Locks that the thread is holding. */
+    struct lock *lock_waiting;          /* The lock that the thread is waiting for. */
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -132,7 +136,7 @@ void thread_yield (void);
 /* Performs some operation on thread t, given auxiliary data AUX. */
 typedef void thread_action_func (struct thread *t, void *aux);
 void thread_foreach (thread_action_func *, void *);
-void blocked_thread_check (struct thread *t, void *aux UNUSED);
+void blocked_thread_check (struct thread *t, void *aux);
 
 int thread_get_priority (void);
 void thread_set_priority (int);
@@ -142,5 +146,9 @@ void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
-bool thread_cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux UNUSED);
+bool thread_cmp_priority (const struct list_elem *a, const struct list_elem *b, void *aux);
+void thread_hold_the_lock(struct lock *);
+void thread_donate_priority (struct thread *);
+void thread_remove_lock (struct lock *);
+void thread_update_priority (struct thread *);
 #endif /* threads/thread.h */
